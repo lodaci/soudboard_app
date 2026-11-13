@@ -20,9 +20,10 @@ class OpenverseSource(private val client: OkHttpClient) : SoundSource {
             .addQueryParameter("page_size", PAGE_SIZE.toString())
             .addQueryParameter("mature", "false")
             .apply {
+                // il campo "category" spesso è vuoto (es. tutto Freesound): filtriamo per durata
                 when (query.kind) {
-                    TrackKind.SFX -> addQueryParameter("category", "sound_effect")
-                    TrackKind.MUSIC -> addQueryParameter("category", "music")
+                    TrackKind.SFX -> addQueryParameter("length", "shortest,short") // < 2 min
+                    TrackKind.MUSIC -> addQueryParameter("length", "medium,long") // > 2 min
                     null -> {}
                 }
             }
@@ -56,7 +57,7 @@ class OpenverseSource(private val client: OkHttpClient) : SoundSource {
                             previewUrl = file,
                             downloadUrl = file,
                             origin = r.str("source") ?: r.str("provider"),
-                            suggestedKind = if (category == "music") TrackKind.MUSIC else TrackKind.SFX,
+                            suggestedKind = if (category == "music" || r.optLong("duration", 0) > 45_000) TrackKind.MUSIC else TrackKind.SFX,
                         )
                     )
                 }
