@@ -24,6 +24,10 @@ class Settings(context: Context) {
         prefs.edit().putFloat(K_MASTER, value).apply()
     }
 
+    var lastYtDlpUpdate: Long
+        get() = prefs.getLong(K_YTDLP, 0L)
+        set(value) = prefs.edit().putLong(K_YTDLP, value).apply()
+
     var lastBoardId: Long
         get() = prefs.getLong(K_BOARD, -1L)
         set(value) = prefs.edit().putLong(K_BOARD, value).apply()
@@ -32,5 +36,6 @@ class Settings(context: Context) {
         const val K_FADE = "fadeMs"
         const val K_MASTER = "master"
         const val K_BOARD = "lastBoard"
+        const val K_YTDLP = "lastYtDlpUpdate"
     }
 }

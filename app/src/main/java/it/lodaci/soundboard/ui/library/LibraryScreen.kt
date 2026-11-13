@@ -347,12 +347,22 @@ private fun TaskCard(task: LinkTasks.Task, onDismiss: () -> Unit) {
             Column(Modifier.weight(1f)) {
                 Text(task.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall)
                 when {
-                    task.error != null -> Text("Errore: ${task.error}", style = MaterialTheme.typography.bodySmall)
-                    task.download && task.progress >= 0 -> {
-                        Text("Download ${task.progress.toInt()}%", style = MaterialTheme.typography.bodySmall)
-                        LinearProgressIndicator(progress = { task.progress / 100f }, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+                    task.error != null -> {
+                        Text(task.error, style = MaterialTheme.typography.bodyMedium)
+                        task.errorDetail?.let {
+                            Text(it, style = MaterialTheme.typography.labelSmall, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                        }
                     }
-                    else -> Text("Lettura del link…", style = MaterialTheme.typography.bodySmall)
+                    else -> {
+                        val label = task.status ?: if (task.download && task.progress >= 0) "Download…" else "Lettura del link…"
+                        Text(
+                            label + if (task.progress >= 0) " ${task.progress.toInt()}%" else "",
+                            style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        )
+                        if (task.progress >= 0) {
+                            LinearProgressIndicator(progress = { task.progress / 100f }, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+                        }
+                    }
                 }
             }
             if (task.error != null) IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, "Chiudi") }

@@ -44,6 +44,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true // richiesto da NewPipeExtractor
     }
     kotlinOptions {
         jvmTarget = "17"
@@ -77,6 +78,14 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.youtubedl.library)
     implementation(libs.coroutines.android)
+    implementation(libs.newpipe.extractor)
+    implementation(libs.okhttp)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)
+}
+
+// Test di rete (YouTube reale): ./gradlew testDebugUnitTest -PnetworkTests=true
+tasks.withType<Test>().configureEach {
+    systemProperty("networkTests", (project.findProperty("networkTests") ?: "false").toString())
 }

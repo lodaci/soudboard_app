@@ -10,7 +10,12 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.ResolvingDataSource
+import android.net.Uri
+import it.lodaci.soundboard.remote.YouTube
+import it.lodaci.soundboard.remote.YouTubeHttp
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import it.lodaci.soundboard.data.Settings
@@ -71,13 +76,29 @@ class MixerEngine(
     private var ticker: Job? = null
 
     private val mediaSourceFactory = DefaultMediaSourceFactory(
-        DefaultDataSource.Factory(
-            context,
-            DefaultHttpDataSource.Factory()
-                .setUserAgent(USER_AGENT)
-                .setAllowCrossProtocolRedirects(true),
-        )
+        ResolvingDataSource.Factory(
+            DefaultDataSource.Factory(
+                context,
+                DefaultHttpDataSource.Factory()
+                    // niente setUserAgent: sovrascriverebbe quello richiesto dagli URL di YouTube
+                    .setDefaultRequestProperties(mapOf("User-Agent" to USER_AGENT))
+                    .setKeepPostFor302Redirects(true)
+                    .setAllowCrossProtocolRedirects(true),
+            )
+        ) { spec -> adaptForYouTube(spec) }
     )
+
+    /** Applica alle richieste verso i server video di YouTube le stesse regole del download. */
+    private fun adaptForYouTube(spec: DataSpec): DataSpec {
+        val url = spec.uri.toString()
+        if (!YouTube.isGoogleVideo(url)) return spec
+        val end = if (spec.length != C.LENGTH_UNSET.toLong()) spec.position + spec.length - 1 else null
+        val shaped = YouTubeHttp.shape(url, spec.position, end)
+        val builder = spec.buildUpon().setHttpRequestHeaders(spec.httpRequestHeaders + shaped.headers)
+        if (shaped.rangeInUrl) builder.setUri(Uri.parse(shaped.url)).setPosition(0)
+        if (shaped.post) builder.setHttpMethod(DataSpec.HTTP_METHOD_POST).setHttpBody(YouTubeHttp.POST_BODY)
+        return builder.build()
+    }
 
     private val audioAttributes = AudioAttributes.Builder()
         .setUsage(C.USAGE_MEDIA)

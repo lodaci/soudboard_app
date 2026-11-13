@@ -23,3 +23,6 @@ jobs:
         with:
           name: DnD-Soundboard-apk
           path: DnD-Soundboard.apk
+      - name: Prova reale YouTube (informativa)
+        continue-on-error: true
+        run: ./gradlew --no-daemon testDebugUnitTest --tests '*YouTubeNetworkTest*' -PnetworkTests=true -i | grep -E "Titolo:|URL:|Scaricati|FAILED|Exception|PASSED|SKIPPED" || true

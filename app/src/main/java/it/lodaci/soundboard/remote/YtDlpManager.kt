@@ -25,6 +25,19 @@ class YtDlpManager(private val context: Context, scope: CoroutineScope) {
         ready.start()
     }
 
+    /** Aggiorna yt-dlp al massimo una volta al giorno (i siti cambiano spesso). */
+    suspend fun autoUpdate(lastUpdate: Long, onUpdated: (Long) -> Unit) {
+        val now = System.currentTimeMillis()
+        if (now - lastUpdate < 24 * 60 * 60 * 1000L) return
+        runCatching { update() }.onSuccess { onUpdated(now) }
+    }
+
+    private fun YoutubeDLRequest.commonOptions(url: String) {
+        addOption("-f", AUDIO_FORMAT)
+        addOption("--no-playlist")
+        if (YouTube.isYouTube(url)) addOption("--extractor-args", "youtube:player_client=default,mweb")
+    }
+
     private suspend fun awaitReady() {
         try {
             ready.await()
@@ -35,10 +48,7 @@ class YtDlpManager(private val context: Context, scope: CoroutineScope) {
 
     suspend fun fetchInfo(url: String): LinkInfo = withContext(Dispatchers.IO) {
         awaitReady()
-        val request = YoutubeDLRequest(url).apply {
-            addOption("-f", AUDIO_FORMAT)
-            addOption("--no-playlist")
-        }
+        val request = YoutubeDLRequest(url).apply { commonOptions(url) }
         val info = YoutubeDL.getInstance().getInfo(request)
         LinkInfo(
             title = info.title?.takeIf { it.isNotBlank() } ?: url,
@@ -55,8 +65,7 @@ class YtDlpManager(private val context: Context, scope: CoroutineScope) {
         awaitReady()
         val dir = File(context.filesDir, "audio/${UUID.randomUUID()}").apply { mkdirs() }
         val request = YoutubeDLRequest(url).apply {
-            addOption("-f", AUDIO_FORMAT)
-            addOption("--no-playlist")
+            commonOptions(url)
             addOption("--no-mtime")
             addOption("--restrict-filenames")
             addOption("-o", dir.absolutePath + "/%(title).60B.%(ext)s")
