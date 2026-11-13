@@ -20,7 +20,7 @@ class YouTubeNetworkTest {
     }
 
     @Test
-    fun resolvesAndDownloadsAudio() = runBlocking {
+    fun resolvesAndDownloadsAudio(): Unit = runBlocking {
         val yt = YouTubeExtractor(client)
         val video = yt.video("https://youtu.be/hAkZgArOF8Q")
         println("Titolo: ${video.title}, durata ${video.durationMs} ms, ${video.extension}, ${video.contentLength} byte")
