@@ -10,6 +10,8 @@ import it.lodaci.soundboard.playback.SourceResolver
 import it.lodaci.soundboard.remote.HttpDownloader
 import it.lodaci.soundboard.remote.LinkTasks
 import it.lodaci.soundboard.remote.YouTubeExtractor
+import it.lodaci.soundboard.remote.catalog.CatalogRepository
+import it.lodaci.soundboard.playback.PreviewPlayer
 import it.lodaci.soundboard.remote.YtDlpManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +44,8 @@ class AppContainer(app: Application) {
     val downloader = HttpDownloader(http)
     val resolver = SourceResolver(ytdlp, youtube)
     val mixer = MixerEngine(app, resolver, settings)
+    val catalog = CatalogRepository(http, settings)
+    val preview = PreviewPlayer(app)
     val linkTasks = LinkTasks(app, appScope, ytdlp, youtube, downloader, db.trackDao())
 
     init {

@@ -24,6 +24,10 @@ data class Track(
     val volume: Float = 1f,
     val loop: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
+    /** crediti per i suoni presi da archivi online (licenze CC‑BY ecc.) */
+    val author: String? = null,
+    val license: String? = null,
+    val sourceUrl: String? = null,
 )
 
 @Entity(tableName = "boards")

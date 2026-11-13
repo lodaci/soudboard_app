@@ -1,0 +1,9 @@
+# Caddy: HTTPS automatico (Let's Encrypt) davanti a SoundVault.
+# 1) Sostituisci il dominio con il tuo (es. suoni.miodominio.it o miosuono.duckdns.org)
+# 2) Sul router inoltra le porte TCP 80 e 443 verso l'IP del NUC
+# 3) Avvia: caddy run --config Caddyfile   (oppure come servizio, vedi README.md)
+
+suoni.esempio.it {
+    encode gzip
+    reverse_proxy 127.0.0.1:8765
+}

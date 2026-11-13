@@ -464,6 +464,20 @@ private fun TrackEditDialog(track: Track, onDismiss: () -> Unit, onSave: (Track)
                 }
                 Text("Volume predefinito: ${(volume * 100).toInt()}%")
                 Slider(value = volume, onValueChange = { volume = it })
+                if (track.author != null || track.license != null || track.sourceUrl != null) {
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    Text("Crediti", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        listOfNotNull(track.author?.let { "Autore: $it" }, track.license?.let { "Licenza: $it" })
+                            .joinToString(" • "),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    track.sourceUrl?.takeIf { it.startsWith("http") }?.let { link ->
+                        TextButton(onClick = {
+                            context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, Uri.parse(link)))
+                        }) { Text("Apri la pagina originale") }
+                    }
+                }
             }
         },
         confirmButton = {

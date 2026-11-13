@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import it.lodaci.soundboard.ui.board.SoundboardScreen
+import it.lodaci.soundboard.ui.explore.ExploreScreen
 import it.lodaci.soundboard.ui.library.LibraryScreen
 import it.lodaci.soundboard.ui.mixer.MixerScreen
 import it.lodaci.soundboard.ui.output.OutputScreen
@@ -38,6 +40,7 @@ import kotlinx.coroutines.flow.StateFlow
 private enum class Tab(val label: String, val icon: ImageVector) {
     BOARD("Soundboard", Icons.Default.GridView),
     LIBRARY("Libreria", Icons.Default.LibraryMusic),
+    EXPLORE("Esplora", Icons.Default.TravelExplore),
     MIXER("Mixer", Icons.Default.Tune),
     OUTPUT("Uscita", Icons.Default.Bluetooth),
 }
@@ -73,7 +76,7 @@ fun AppRoot(sharedUrl: StateFlow<String?>, onSharedUrlConsumed: () -> Unit) {
                                 Icon(t.icon, null)
                             }
                         },
-                        label = { Text(t.label) },
+                        label = { Text(t.label, maxLines = 1) },
                     )
                 }
             }
@@ -83,6 +86,7 @@ fun AppRoot(sharedUrl: StateFlow<String?>, onSharedUrlConsumed: () -> Unit) {
             when (Tab.entries[tab]) {
                 Tab.BOARD -> SoundboardScreen(vm)
                 Tab.LIBRARY -> LibraryScreen(vm, incomingUrl = incomingUrl, onIncomingUrlConsumed = onSharedUrlConsumed)
+                Tab.EXPLORE -> ExploreScreen()
                 Tab.MIXER -> MixerScreen(vm)
                 Tab.OUTPUT -> OutputScreen(vm)
             }

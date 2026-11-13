@@ -10,6 +10,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Update
 import androidx.room.Upsert
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -60,7 +62,7 @@ interface PadDao {
     suspend fun clear(boardId: Long, position: Int)
 }
 
-@Database(entities = [Track::class, Board::class, Pad::class], version = 1, exportSchema = false)
+@Database(entities = [Track::class, Board::class, Pad::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun trackDao(): TrackDao
     abstract fun boardDao(): BoardDao
@@ -68,6 +70,17 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         fun build(context: Context): AppDatabase =
-            Room.databaseBuilder(context, AppDatabase::class.java, "soundboard.db").build()
+            Room.databaseBuilder(context, AppDatabase::class.java, "soundboard.db")
+                .addMigrations(MIGRATION_1_2)
+                .build()
+
+        /** v2: crediti (autore, licenza, pagina d'origine) per i suoni degli archivi online */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE tracks ADD COLUMN author TEXT")
+                db.execSQL("ALTER TABLE tracks ADD COLUMN license TEXT")
+                db.execSQL("ALTER TABLE tracks ADD COLUMN sourceUrl TEXT")
+            }
+        }
     }
 }

@@ -63,6 +63,7 @@ class HttpDownloader(private val client: OkHttpClient) {
         dest: File,
         expectedLength: Long = -1,
         maxBytes: Long = Long.MAX_VALUE,
+        extraHeaders: Map<String, String> = emptyMap(),
         onProgress: (Float) -> Unit = {},
     ): Long = withContext(Dispatchers.IO) {
         var pos = 0L
@@ -76,6 +77,7 @@ class HttpDownloader(private val client: OkHttpClient) {
                 val shaped = YouTubeHttp.shape(url, pos, end)
                 val builder = Request.Builder().url(shaped.url)
                 shaped.headers.forEach { (k, v) -> builder.header(k, v) }
+                extraHeaders.forEach { (k, v) -> builder.header(k, v) }
                 if (!shaped.rangeInUrl) builder.header("Range", "bytes=$pos-$end")
                 if (shaped.post) builder.post(YouTubeHttp.POST_BODY.toRequestBody()) else builder.get()
 
