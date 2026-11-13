@@ -7,6 +7,7 @@ import it.lodaci.soundboard.data.SourceType
 import it.lodaci.soundboard.data.Track
 import it.lodaci.soundboard.data.TrackDao
 import it.lodaci.soundboard.data.TrackKind
+import it.lodaci.soundboard.remote.catalog.SoundResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -75,6 +76,44 @@ class LinkTasks(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                val (msg, detail) = friendlyError(e)
+                updateTask(id) { it.copy(error = msg, errorDetail = detail) }
+            }
+        }
+    }
+
+    /** Scarica nella libreria un suono trovato in un archivio online (Esplora). */
+    fun addFromCatalog(result: SoundResult, kind: TrackKind, headers: Map<String, String>) {
+        val id = UUID.randomUUID().toString()
+        _tasks.update { it + Task(id, result.landingUrl ?: result.downloadUrl, result.title, download = true) }
+        scope.launch(Dispatchers.IO) {
+            val dir = File(context.filesDir, "audio/${UUID.randomUUID()}").apply { mkdirs() }
+            try {
+                val ext = (result.format ?: "mp3").lowercase().filter { it.isLetterOrDigit() }.take(5).ifEmpty { "mp3" }
+                val file = File(dir, "${safeName(result.title)}.$ext")
+                http.download(
+                    result.downloadUrl, file,
+                    expectedLength = result.sizeBytes,
+                    extraHeaders = headers,
+                    onProgress = { p -> updateTask(id) { it.copy(progress = p) } },
+                )
+                val duration = AudioMeta.durationMs(context, Uri.fromFile(file)).takeIf { it > 0 } ?: result.durationMs
+                trackDao.insert(
+                    Track(
+                        title = result.title, kind = kind, source = SourceType.DOWNLOADED,
+                        uri = file.absolutePath, remoteUrl = result.landingUrl,
+                        durationMs = duration, loop = kind == TrackKind.MUSIC,
+                        author = result.author, license = result.license,
+                        sourceUrl = result.landingUrl ?: result.origin,
+                    )
+                )
+                _events.tryEmit("Aggiunto alla libreria: ${result.title}")
+                _tasks.update { list -> list.filterNot { it.id == id } }
+            } catch (e: CancellationException) {
+                dir.deleteRecursively()
+                throw e
+            } catch (e: Exception) {
+                dir.deleteRecursively()
                 val (msg, detail) = friendlyError(e)
                 updateTask(id) { it.copy(error = msg, errorDetail = detail) }
             }

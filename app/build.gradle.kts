@@ -83,6 +83,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)
+    testImplementation(libs.org.json)
 }
 
 // Test di rete (YouTube reale): ./gradlew testDebugUnitTest -PnetworkTests=true

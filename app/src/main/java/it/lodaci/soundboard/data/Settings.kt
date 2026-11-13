@@ -24,6 +24,18 @@ class Settings(context: Context) {
         prefs.edit().putFloat(K_MASTER, value).apply()
     }
 
+    var freesoundKey: String
+        get() = prefs.getString(K_FREESOUND, "").orEmpty()
+        set(value) = prefs.edit().putString(K_FREESOUND, value.trim()).apply()
+
+    var archiveUrl: String
+        get() = prefs.getString(K_ARCHIVE_URL, "").orEmpty()
+        set(value) = prefs.edit().putString(K_ARCHIVE_URL, value.trim()).apply()
+
+    var archiveToken: String
+        get() = prefs.getString(K_ARCHIVE_TOKEN, "").orEmpty()
+        set(value) = prefs.edit().putString(K_ARCHIVE_TOKEN, value.trim()).apply()
+
     var lastYtDlpUpdate: Long
         get() = prefs.getLong(K_YTDLP, 0L)
         set(value) = prefs.edit().putLong(K_YTDLP, value).apply()
@@ -37,5 +49,8 @@ class Settings(context: Context) {
         const val K_MASTER = "master"
         const val K_BOARD = "lastBoard"
         const val K_YTDLP = "lastYtDlpUpdate"
+        const val K_FREESOUND = "freesoundKey"
+        const val K_ARCHIVE_URL = "archiveUrl"
+        const val K_ARCHIVE_TOKEN = "archiveToken"
     }
 }

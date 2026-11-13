@@ -10,6 +10,7 @@ App Android per gestire musiche ed effetti sonori durante le sessioni di D&D.
 - **Soundboard**: griglia di tasti rapidi (più schede, 2–6 colonne). Ogni tasto ha traccia, emoji, testo e colore. Tocca per suonare, tieni premuto per modificare.
   - tracce in loop: il tasto avvia/ferma (con fade)
   - suoni non in loop: il tasto li fa ripartire da capo
+- **Esplora**: cerca effetti e musiche su **Openverse** (Creative Commons, senza account), su **Freesound** (con la tua chiave API gratuita) e nel **tuo archivio privato** sul NUC. Puoi ascoltare l'anteprima e aggiungere i suoni alla libreria; autore e licenza restano salvati nella traccia.
 - **Uscita Bluetooth**: mostra dove esce l'audio e include la guida per usare le casse di un laptop Windows.
 - La riproduzione continua a schermo spento (notifica con "Stop tutto").
 
@@ -35,6 +36,10 @@ Android può inviare audio via Bluetooth solo a un dispositivo che fa da "cassa"
 - I link in streaming richiedono internet durante la sessione; quelli scaricati funzionano offline.
 - Se YouTube cambia qualcosa e i link smettono di funzionare, usa **Uscita → Aggiorna yt-dlp**.
 - Scaricare contenuti da YouTube può violarne i Termini di servizio: usalo per audio di cui hai i diritti o per uso personale.
+
+## Archivio privato sul NUC (SoundVault)
+
+La cartella [`server/`](server/README.md) contiene il server da installare sul NUC Windows. Indicizza le tue raccolte (Sonniss GDC, Kenney, OpenGameArt, cartelle tue) e le rende cercabili dall'app, protette da token. Guida completa in [server/README.md](server/README.md).
 
 ## Sviluppo
 
